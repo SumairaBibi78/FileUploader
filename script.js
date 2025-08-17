@@ -10,6 +10,8 @@ const gallery   = document.getElementById('gallery');
 const errorMsg  = document.getElementById('error-msg');
 const themeTgl  = document.getElementById('theme-toggle');
 
+let images = [];
+
 // Apply saved theme
 if (localStorage.getItem('theme') === 'dark') { document.body.classList.add('dark'); }
 
@@ -19,10 +21,9 @@ themeTgl.addEventListener('click', () => {
   localStorage.setItem('theme', dark ? 'dark' : 'light');
 });
 
-// Initialize from localStorage_Load saved Images
-let images;
+// Load saved Images
 try { images = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } 
-catch (err) { images = []; }
+catch { images = []; }
 images.forEach(dataURL => renderThumb(dataURL));
 
 // Setup Drag & Drop
@@ -33,13 +34,17 @@ images.forEach(dataURL => renderThumb(dataURL));
     if (evt === 'dragover') {dropArea.classList.add('dragover');}
     else {dropArea.classList.remove('dragover');}
 
-    if (evt === 'drop') {
+    if (evt === 'drop' && e.dataTransfer.files.length) {
+      handleFiles(e.dataTransfer.files);
+    }
+
+    /*if (evt === 'drop') {
       const dt = e.dataTransfer;
       //only handle true file drops
       if (dt?.files?.length) {
         handleFiles(dt.files);
       }
-    }
+    }*/
   });
 });
 
@@ -127,8 +132,8 @@ function simulateUpload(file) {
 
   const prog = document.createElement('div');
   prog.classList.add('progress');
-  thumb.appendChild(prog);
-  gallery.appendChild(thumb);
+  thumb.append(prog);
+  gallery.append(thumb);
 
   let progress = 0;
   const interval = setInterval(() => {
@@ -171,26 +176,27 @@ function renderThumb(dataURL) {
   const thumb = document.createElement('div');
   thumb.classList.add('thumb');
   thumb.setAttribute('draggable', true);
-  gallery.appendChild(thumb);
+  gallery.append(thumb);
   addThumbnail(dataURL, thumb);
 }
 
 // Create an img inside thumb-container
 function addThumbnail(dataURL, thumb) {
-  if (!thumb) {
+  /*if (!thumb) {
     thumb = document.createElement('div');
     thumb.classList.add('thumb');
     thumb.setAttribute('draggable', true);
     thumb.setAttribute('tabindex', '0'); //focusable container
-  }
+  }*/
   //always append idempotently
-  if (!gallery.contains(thumb)) {gallery.appendChild(thumb);}
+  if (!gallery.contains(thumb)) {gallery.append(thumb);}
+  thumb.tabIndex = 0;
 
   //create image with alt
   const img = document.createElement('img');
   img.src = dataURL;
   img.alt = 'Uploaded Image';
-  thumb.appendChild(img);
+  thumb.append(img);
     
   // create remove button
   const btn = document.createElement('button');
@@ -200,7 +206,7 @@ function addThumbnail(dataURL, thumb) {
   btn.addEventListener('click', () => {
     if (persistImage(dataURL, 'remove')) {thumb.remove();}
   });
-  thumb.appendChild(btn);
+  thumb.append(btn);
 
   //drag-to-reorder
   thumb.addEventListener('dragstart', () => thumb.classList.add('dragging'));
@@ -209,9 +215,40 @@ function addThumbnail(dataURL, thumb) {
     updateSavedOrder();
   });
 }
-
-//persist into localStorage
+//persist into localStorage new code
 function persistImage(dataURL, action = 'add') {
+  // 1) Build the next state, but don’t touch `images` yet
+  let next;
+  if (action === 'add') {
+    if (images.includes(dataURL)) {
+      showError('File Already Exists.');
+      return false;
+    }
+    next = [...images, dataURL];
+  } else {
+    if (!images.includes(dataURL)) {
+      showError('Image not Found to Remove.');
+      return false;
+    }
+    next = images.filter(item => item !== dataURL);
+  }
+
+  // 2) Attempt to persist
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    showError('Failed to Update Images.');
+    return false;
+  }
+
+  // 3) Only now replace in-memory state
+  images = next;
+  return true;
+}
+
+
+//persist into localStorage old code
+/*function persistImage(dataURL, action = 'add') {
   try {
     if (action === 'add') {
       if (images.includes(dataURL)) {
@@ -235,9 +272,23 @@ function persistImage(dataURL, action = 'add') {
     showError('Failed to update images.');
     return false;
   }
+}*/
+
+//NEW CODE
+function updateSavedOrder() {
+  const next = [...gallery.querySelectorAll('img')].map(img => img.src);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    showError('Failed to Save Order.');
+    return;
+  }
+  images = next;
 }
 
-function updateSavedOrder() {
+//OLD CODE
+/*function updateSavedOrder() {
   images = [...gallery.querySelectorAll('img')].map(img => img.src);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-}
+}*/
