@@ -37,14 +37,6 @@ images.forEach(dataURL => renderThumb(dataURL));
     if (evt === 'drop' && e.dataTransfer.files.length) {
       handleFiles(e.dataTransfer.files);
     }
-
-    /*if (evt === 'drop') {
-      const dt = e.dataTransfer;
-      //only handle true file drops
-      if (dt?.files?.length) {
-        handleFiles(dt.files);
-      }
-    }*/
   });
 });
 
@@ -152,13 +144,13 @@ function previewFile(file, thumb) {
 
   reader.onload = e => {
     const dataURL = e.target.result;
-    // if duplicate (or error), remove the placeholder and bail
+    // if duplicate or error
     if (!persistImage(dataURL, 'add')) {
       thumb.remove();
       return;
     }
 
-    // now that it's saved, show the preview
+    //show the preview
     thumb.innerHTML = '';
     addThumbnail(dataURL, thumb);
   };
@@ -182,12 +174,7 @@ function renderThumb(dataURL) {
 
 // Create an img inside thumb-container
 function addThumbnail(dataURL, thumb) {
-  /*if (!thumb) {
-    thumb = document.createElement('div');
-    thumb.classList.add('thumb');
-    thumb.setAttribute('draggable', true);
-    thumb.setAttribute('tabindex', '0'); //focusable container
-  }*/
+
   //always append idempotently
   if (!gallery.contains(thumb)) {gallery.append(thumb);}
   thumb.tabIndex = 0;
@@ -215,9 +202,9 @@ function addThumbnail(dataURL, thumb) {
     updateSavedOrder();
   });
 }
-//persist into localStorage new code
+//persist into localStorage
 function persistImage(dataURL, action = 'add') {
-  // 1) Build the next state, but don’t touch `images` yet
+  
   let next;
   if (action === 'add') {
     if (images.includes(dataURL)) {
@@ -233,7 +220,6 @@ function persistImage(dataURL, action = 'add') {
     next = images.filter(item => item !== dataURL);
   }
 
-  // 2) Attempt to persist
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
@@ -241,40 +227,10 @@ function persistImage(dataURL, action = 'add') {
     return false;
   }
 
-  // 3) Only now replace in-memory state
   images = next;
   return true;
 }
 
-
-//persist into localStorage old code
-/*function persistImage(dataURL, action = 'add') {
-  try {
-    if (action === 'add') {
-      if (images.includes(dataURL)) {
-        showError('File Already Exists.');
-        return false;
-      }
-      images.push(dataURL);
-    } 
-    else { // remove
-      const idx = images.indexOf(dataURL);
-      if (idx === -1) {
-        showError('Image not Found to remove.');
-        return false;
-      }
-      images.splice(idx, 1);
-    }
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-    return true;
-  } catch (err) {
-    showError('Failed to update images.');
-    return false;
-  }
-}*/
-
-//NEW CODE
 function updateSavedOrder() {
   const next = [...gallery.querySelectorAll('img')].map(img => img.src);
 
@@ -286,9 +242,3 @@ function updateSavedOrder() {
   }
   images = next;
 }
-
-//OLD CODE
-/*function updateSavedOrder() {
-  images = [...gallery.querySelectorAll('img')].map(img => img.src);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
-}*/
