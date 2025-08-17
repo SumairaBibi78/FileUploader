@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>File Uploader</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <header class="site-header">
+            <button id="theme-toggle" aria-label="Toggle Light/Dark">🌙 / ☀️</button>
+        </header>
+
+        <div class="uploader-container">
+            <h1>Image Uploader</h1>
+            <div class="drop-area" id="drop-area">
+                <p>Drag & Drop Images Here<br/>or <span class="browse">Browse</span></p>
+                <input type="file" id="fileElem" accept="image/jpeg, image/png, image/gif" multiple hidden />
+            </div>
+            <div id="gallery" class="gallery"></div>
+            <div id="error-msg" class="error-msg"></div>
+        </div>
+        
+        <footer class="site-footer"><p>© 2025 Sumaira Bibi.</p></footer>
+
+        <script src="script.js" defer></script>
+    </body>
+</html>

@@ -10,10 +10,8 @@ Features <br>
 ✅ CSS styling for file drop area & animations.<br>
 ✅ JavaScript event listeners for file selection and progress simulation.<br>
 ✅ Handling FileReader API for image preview.<br>
-✅ Store uploaded images in localStorage and persist them even after a page refresh.<br>
+✅ Store uploaded images in localStorage.<br>
 ✅ toggle button in header for light and dark.<br>
-✅ footer with text showing author.<br>
-✅ responsive UI according to mobile and laptop.<br>
 ✅ Add “Remove” buttons on each thumbnail to let users delete images (also update localStorage).<br>
 ✅ Limit total upload size or number of images for performance.<br>
 ✅ Introduce drag-to-reorder thumbnails for dynamic galleries.<br>
